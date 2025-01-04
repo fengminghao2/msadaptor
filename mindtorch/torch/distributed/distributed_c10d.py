@@ -2171,10 +2171,12 @@ def _coalescing_manager(
             "ProcessGroup has non-empty op list at the start of coalescing"
         )
     if device:
-        group._start_coalescing(device)
+        group.start_coalescing(device)
     cm = _CoalescingManager()
     yield cm
+
     op_list = _world.pg_coalesce_state.pop(group)
+    work = None
     if op_list:
         # Collectives supporting "Fast Path" coalescing are captured.
         # See implementation in corresponding collective APIs.
@@ -2212,10 +2214,11 @@ def _coalescing_manager(
 
     if device:
         # Old style of letting each coll inside the context manager to call into C++ counterpart via python binding
-        work = group._end_coalescing(device)
+        work = group.end_coalescing(device)
 
     if async_ops:
-        cm.append(work)  # type: ignore[possibly-undefined]
+        if work:
+            cm.append(work) # type: ignore[possibly-undefined]
     else:
         work.wait()  # type: ignore[possibly-undefined]
 

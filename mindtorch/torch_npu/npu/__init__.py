@@ -1,5 +1,6 @@
 import traceback
 from .utils import device
+from .random import manual_seed, manual_seed_all
 
 _initialized = False
 _queued_calls = []  # don't invoke these until initialization occurs
